@@ -8,7 +8,7 @@ The MACD answers one question: **is the trend picking up speed or running out of
 
 ## What's inside
 
-[`MACD Field Guide.html`](MACD%20Field%20Guide.html) is one HTML file with no dependencies. It covers:
+[`index.html`](index.html) is one HTML file with no dependencies. It covers:
 
 1. **What you're looking at.** An interactive price + MACD chart you can hover over to see the MACD line, signal line and histogram values for each day.
 2. **Four things to look for.** Crossovers, the zero line, histogram size and divergence, plus a table showing why *where* a crossover happens matters.
@@ -25,14 +25,6 @@ The MACD answers one question: **is the trend picking up speed or running out of
 | MACD line | 12-day EMA − 26-day EMA | Above zero the recent trend is up; below zero it's down |
 | Signal line | 9-day EMA of the MACD line | A smoothed copy to compare the MACD line against |
 | Histogram | MACD − signal | Growing bars mean momentum is strengthening; shrinking bars mean it's fading |
-
-## Usage
-
-Open the file in any browser:
-
-```bash
-open "MACD Field Guide.html"
-```
 
 ## Disclaimer
 
