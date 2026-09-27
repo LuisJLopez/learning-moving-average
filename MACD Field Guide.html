@@ -1,0 +1,348 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>MACD Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --ink:#141B26; --muted:#5A6577; --rule:#DCE2EA; --soft:#EAEEF4;
+  --macd:#2962FF; --signal:#F57C00; --bull:#15917F; --bear:#D93A40; --price:#141B26;
+  --focus:#2962FF;
+  --display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E131B; --surface:#151C27; --ink:#E4E9F0; --muted:#94A1B4; --rule:#273142; --soft:#1C2533;
+    --macd:#5B8CFF; --signal:#FF9A3C; --bull:#2FBFA9; --bear:#F2666A; --price:#E4E9F0; --focus:#7FA4FF;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E131B; --surface:#151C27; --ink:#E4E9F0; --muted:#94A1B4; --rule:#273142; --soft:#1C2533;
+  --macd:#5B8CFF; --signal:#FF9A3C; --bull:#2FBFA9; --bear:#F2666A; --price:#E4E9F0; --focus:#7FA4FF;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15.5px/1.6 var(--body);margin:0}
+.wrap{max-width:780px;margin:0 auto;padding-inline:18px;padding-block:40px 64px;display:flex;flex-direction:column;gap:56px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(2.1rem,6vw,3.1rem);font-weight:700;letter-spacing:-0.02em}
+h2{font-size:1.6rem;font-weight:700;letter-spacing:-0.01em}
+h3{font-size:1.1rem;font-weight:600}
+p{margin:0;max-width:65ch}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:14px}
+.lede{font-size:1.08rem;color:var(--muted)}
+code,.mono{font-family:var(--mono);font-size:.92em}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px}
+canvas{display:block;width:100%;touch-action:pan-y}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted);align-items:center}
+.sw{display:inline-block;width:18px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.sw.bars{height:10px;width:10px;border-radius:1px;background:linear-gradient(90deg,var(--bull) 50%,var(--bear) 50%)}
+.readout{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px;border-top:1px solid var(--rule);padding-top:12px}
+.readout div{display:flex;flex-direction:column;gap:2px}
+.readout span{font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+.readout b{font:500 15px var(--mono);font-variant-numeric:tabular-nums}
+.parts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.part{display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:3px solid var(--rule)}
+.part.m{border-color:var(--macd)} .part.s{border-color:var(--signal)} .part.h{border-image:linear-gradient(90deg,var(--bull) 50%,var(--bear) 50%) 1}
+.part p{font-size:14.5px;color:var(--muted)}
+.part .f{font:500 12.5px var(--mono);color:var(--ink)}
+.tip{background:var(--soft);border-radius:10px;padding:14px 16px;font-size:14.5px}
+.tip b{font-weight:600}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.lesson{display:flex;flex-direction:column;gap:10px}
+.lesson p{font-size:14.5px;color:var(--muted)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td:first-child{font-weight:600;white-space:nowrap}
+.tag{display:inline-block;font:500 12px/1 var(--mono);padding:5px 8px;border-radius:99px;white-space:nowrap}
+.tag.bull{color:var(--bull);background:color-mix(in srgb,var(--bull) 14%,transparent)}
+.tag.bear{color:var(--bear);background:color-mix(in srgb,var(--bear) 14%,transparent)}
+.tag.mix{color:var(--signal);background:color-mix(in srgb,var(--signal) 15%,transparent)}
+/* quiz */
+.quiz{display:flex;flex-direction:column;gap:14px}
+.qhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.progress{display:flex;gap:5px}
+.progress i{width:22px;height:5px;border-radius:3px;background:var(--rule)}
+.progress i.ok{background:var(--bull)} .progress i.no{background:var(--bear)} .progress i.cur{background:var(--macd)}
+.qprompt{font-weight:500}
+.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.choice{font:600 15px var(--body);color:var(--ink);background:var(--surface);border:1.5px solid var(--rule);border-radius:10px;padding:12px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:border-color .15s,background .15s}
+.choice:hover:not(:disabled){border-color:var(--muted)}
+.choice:focus-visible,.btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.choice .dot{width:9px;height:9px;border-radius:50%}
+.choice[data-v="bull"] .dot{background:var(--bull)} .choice[data-v="bear"] .dot{background:var(--bear)} .choice[data-v="mix"] .dot{background:var(--signal)}
+.choice:disabled{cursor:default}
+.choice.right{border-color:var(--bull);background:color-mix(in srgb,var(--bull) 12%,var(--surface))}
+.choice.wrong{border-color:var(--bear);background:color-mix(in srgb,var(--bear) 10%,var(--surface))}
+.choice.dim{opacity:.5}
+.feedback{display:flex;flex-direction:column;gap:8px;border-left:3px solid var(--rule);padding:4px 0 4px 14px}
+.feedback.ok{border-color:var(--bull)} .feedback.no{border-color:var(--bear)}
+.verdict{font-weight:600}
+.feedback.ok .verdict{color:var(--bull)} .feedback.no .verdict{color:var(--bear)}
+.btn{font:600 14.5px var(--body);background:var(--macd);color:#fff;border:0;border-radius:9px;padding:11px 18px;cursor:pointer;align-self:flex-start}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--rule)}
+.score{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.score .big{font:700 3rem/1 var(--display)}
+.reads{display:flex;flex-direction:column;gap:16px}
+.read{display:grid;grid-template-columns:120px 1fr;gap:16px;padding-bottom:16px;border-bottom:1px solid var(--rule)}
+.read:last-child{border-bottom:0;padding-bottom:0}
+.read .tk{font:700 1.3rem var(--display)}
+.vals{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.val{font:500 12.5px var(--mono);font-variant-numeric:tabular-nums;padding:4px 8px;border-radius:6px;background:var(--soft)}
+.val.m{color:var(--macd)} .val.s{color:var(--signal)}
+.read p{font-size:14.5px;color:var(--muted)}
+ul.limits{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:8px;max-width:65ch}
+footer{font-size:13px;color:var(--muted)}
+@media (max-width:640px){
+  .parts,.grid2{grid-template-columns:1fr}
+  .readout{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .read{grid-template-columns:1fr;gap:4px}
+}
+@media (max-width:420px){.choices{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<main class="wrap">
+  <header class="stack">
+    <span class="eyebrow">Momentum indicator · 12 · 26 · 9</span>
+    <h1>MACD Field Guide</h1>
+    <p class="lede">The MACD answers one question: is the trend picking up speed or running out of it? Learn its three parts, the four things to look for, then test yourself on eight charts.</p>
+  </header>
+
+  <section class="stack" aria-labelledby="anat">
+    <span class="eyebrow">Part 1</span>
+    <h2 id="anat">What you're looking at</h2>
+    <p>The MACD sits in its own pane under the price chart. Move your finger or cursor across the chart to see each value day by day.</p>
+    <div class="panel">
+      <div class="legend">
+        <span><i class="sw" style="background:var(--price)"></i>Price</span>
+        <span><i class="sw" style="background:var(--macd)"></i>MACD line</span>
+        <span><i class="sw" style="background:var(--signal)"></i>Signal line</span>
+        <span><i class="sw bars"></i>Histogram</span>
+      </div>
+      <canvas id="anatomy" height="320" role="img" aria-label="Example price chart with MACD line, signal line and histogram below it"></canvas>
+      <div class="readout" aria-live="polite">
+        <div><span>Day</span><b id="r-day">–</b></div>
+        <div><span style="color:var(--macd)">MACD</span><b id="r-m">–</b></div>
+        <div><span style="color:var(--signal)">Signal</span><b id="r-s">–</b></div>
+        <div><span>Histogram</span><b id="r-h">–</b></div>
+      </div>
+    </div>
+    <div class="parts">
+      <div class="part m"><h3>MACD line</h3><span class="f">12-day EMA − 26-day EMA</span><p>The gap between a fast and a slow moving average. Above zero, the recent trend is up. Below zero, it's down. The further from zero, the stronger the move.</p></div>
+      <div class="part s"><h3>Signal line</h3><span class="f">9-day EMA of the MACD line</span><p>A slower, smoothed copy of the MACD line. It exists so you have something to compare the MACD line against.</p></div>
+      <div class="part h"><h3>Histogram</h3><span class="f">MACD − signal</span><p>The distance between the two lines, drawn as bars. Growing bars mean momentum is strengthening. Faded, shrinking bars mean it's weakening.</p></div>
+    </div>
+    <div class="tip"><b>Reading the TradingView legend.</b> When you see <code>MACD close 12 26 9 &nbsp;0.6530 &nbsp;−3.93 &nbsp;−4.58</code>, the three numbers are in this order: <b>histogram</b>, <b>MACD line</b>, <b>signal line</b>. Check it: −3.93 − (−4.58) = 0.65. Those are the values from your AAOI chart.</div>
+  </section>
+
+  <section class="stack" aria-labelledby="look">
+    <span class="eyebrow">Part 2</span>
+    <h2 id="look">Four things to look for</h2>
+    <div class="grid2">
+      <div class="panel lesson"><h3>1. Crossovers</h3><canvas data-key="L_cross" data-ann="cross" height="200" role="img" aria-label="MACD line crossing above the signal line"></canvas><p>When the blue MACD line crosses <b>above</b> the orange signal line, momentum is turning up. Crossing <b>below</b> means it's turning down. The circle marks the cross.</p></div>
+      <div class="panel lesson"><h3>2. The zero line</h3><canvas data-key="L_zero" data-ann="zero" height="200" role="img" aria-label="MACD line crossing above zero"></canvas><p>Above zero, the 12-day average is above the 26-day average, so the short-term trend is up. A cross of zero is slower than a crossover but more meaningful.</p></div>
+      <div class="panel lesson"><h3>3. Histogram size</h3><canvas data-key="L_hist" data-ann="none" height="200" role="img" aria-label="Histogram bars shrinking while price still rises"></canvas><p>Price is still rising at the right edge, but the bars have shrunk to almost nothing. The move is losing steam. Shrinking bars usually appear before a crossover.</p></div>
+      <div class="panel lesson"><h3>4. Divergence</h3><canvas data-key="L_div" data-ann="div" height="200" role="img" aria-label="Price makes a lower low while MACD makes a higher low"></canvas><p>Price made a lower low, but the MACD made a higher low. The second sell-off had less force. That's bullish divergence. The mirror image, a higher high in price with a lower high in MACD, is bearish.</p></div>
+    </div>
+    <h3 style="margin-top:12px">Where the crossover happens matters</h3>
+    <p>A crossover means more when it agrees with the zero line.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Crossover</th><th>Position</th><th>What it usually means</th></tr></thead>
+        <tbody>
+          <tr><td>MACD crosses up</td><td>Above zero</td><td><span class="tag bull">Strongest buy signal</span> Trend and momentum agree. An uptrend is resuming after a pause.</td></tr>
+          <tr><td>MACD crosses up</td><td>Below zero</td><td><span class="tag mix">Early, weaker</span> Selling is slowing inside a downtrend. Not yet proof buyers are in control.</td></tr>
+          <tr><td>MACD crosses down</td><td>Above zero</td><td><span class="tag mix">Warning</span> An uptrend is losing momentum. Often the start of a pullback.</td></tr>
+          <tr><td>MACD crosses down</td><td>Below zero</td><td><span class="tag bear">Strongest sell signal</span> Trend and momentum agree. A downtrend is resuming.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="stack" aria-labelledby="qz">
+    <span class="eyebrow">Part 3</span>
+    <h2 id="qz">Bullish or not?</h2>
+    <p>Each chart is built from real MACD maths (12, 26, 9) on example prices. Judge only the <b>right edge</b>, where today would be.</p>
+    <div class="panel quiz" id="quiz"></div>
+  </section>
+
+  <section class="stack" aria-labelledby="yours">
+    <span class="eyebrow">Part 4</span>
+    <h2 id="yours">Reading your two charts</h2>
+    <div class="panel reads">
+      <div class="read">
+        <div class="tk">AAOI</div>
+        <div>
+          <div class="vals"><span class="val m">MACD −3.93</span><span class="val s">Signal −4.58</span><span class="val">Histogram +0.65</span><span class="tag mix">Mixed</span></div>
+          <p>The blue line has just crossed above the orange line, so the histogram turned green. But both lines are well below zero. That's the "crosses up, below zero" row: selling is slowing, but the downtrend hasn't ended. You'd want the MACD to climb back above zero, and price to reclaim the 200-day SMA, before calling it bullish.</p>
+        </div>
+      </div>
+      <div class="read">
+        <div class="tk">AXTI</div>
+        <div>
+          <div class="vals"><span class="val m">MACD 2.62</span><span class="val s">Signal 0.86</span><span class="val">Histogram +1.76</span><span class="tag bull">Bullish</span></div>
+          <p>Both lines are above zero, the MACD is above its signal line, and the green bars are growing. Momentum and trend agree. The next thing to watch is whether the bars start shrinking as price tests the 100-day SMA near $79.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stack" aria-labelledby="lim">
+    <span class="eyebrow">Before you rely on it</span>
+    <h2 id="lim">What the MACD can't tell you</h2>
+    <ul class="limits">
+      <li><b>It lags.</b> It's built from moving averages, so it confirms a move after it has started. It will never catch the exact bottom or top.</li>
+      <li><b>It fails in sideways markets.</b> When price chops in a range, the lines cross back and forth and most signals reverse within days.</li>
+      <li><b>Divergences can last.</b> A strong trend can keep going for weeks while a divergence builds. Treat it as a warning, not a trigger.</li>
+      <li><b>Use it with price.</b> Check it against the chart itself: higher lows or lower highs, support levels like the 200-day SMA, and volume. When they agree, the signal is worth more.</li>
+    </ul>
+  </section>
+
+  <footer>For learning only. Example charts use generated prices, not real stocks, and nothing here is financial advice.</footer>
+</main>
+
+<script>
+const DATA = {"crossUp":[50,50.34,50.73,50.77,50.76,51.21,50.88,50.44,50.77,51.16,51.25,51.48,50.84,50.99,51.17,50.95,51.08,50.9,51.17,51.24,51.03,51.08,51.05,51.32,51.85,52.11,52.69,52.53,52.37,52.51,52.8,53.03,53.73,53.73,53.63,53.65,53.43,53.55,53.64,54.02,53.88,54.07,54.89,55.52,56.3,57.22,58.08,58.29,59.21,60.39,60.68,61.49,61.62,62.34,63.54,64.19,65.31,66.96,67.45,68.24,69.33,70.03,71.27,71.21,71.75,72.31,73.09,73.55,73.65,74.51,75.85,76.6,77.91,78.87,79.61,80.74,82.05,82.29,82.79,82.73,83.57,84.65,85.12,85.26,86.49,86.97,87.15,89.32,89.58,90.75,92.07,92.64,92.91,92.91,93.95,95.35,95.36,94.41,93.91,94.7,94.35,94.11,93.04,92.11,91.95,92.34,91.36,91.62,91.2,90.08,91.34,93.35,93.76,94.67,95.18,96.11,97.16,98.65,98.83],"crossDownTop":[50,50.24,50.57,50.35,50.54,50.08,50.55,50.3,50.45,50.29,50.06,50.23,50.57,50.51,50.52,50.43,50.04,50.28,49.37,49.24,49.3,49.03,48.56,48.74,48.36,48.05,48.18,48,47.92,48.27,48.24,48.48,48.68,48.03,47.94,47.86,47.52,47.29,47.39,47.34,47.36,47.22,47.44,47.72,48.2,48.59,49.16,49.53,50.25,50.37,50.42,50.86,51.47,52.08,52.87,52.94,53.26,53.71,54.8,54.91,55.56,56.17,56.92,56.9,57.14,57.54,58.15,58.71,58.75,58.85,59.11,58.62,59.02,59.25,59.83,60.68,61.73,62.43,63.48,64.02,65.14,65.79,65.32,65.54,66.23,66.78,67.27,67.95,68.99,70.2,70.24,70.21,71.11,71.73,73.34,73.78,74.22,75.22,76.2,76.68,76.71,76.58,76.99,77.11,77.4,77.71,77.54,78.23,77.49,76.91,76.25,75.97,75.29],"crossUpBelow":[50,50.37,50.45,51.11,52.05,52.05,52.67,52.81,53.23,53.48,53.64,53.88,54.17,54.3,55.05,54.71,54.7,54.95,54.94,55.22,55.23,55.35,55.53,55.79,56.25,55.9,56.08,56.21,56.23,56.44,56.47,56.85,57.3,57.15,57.14,57.55,58.02,57.9,58.42,58.66,58.32,58.07,58.23,57.6,57.42,56.52,56.81,56.23,56.02,55.65,55.13,55.14,54.86,55.01,55.04,54.45,53.82,52.78,52.51,51.76,51.27,50.92,51.19,50.41,50.19,49.76,49.27,48.88,48.57,48.25,48.2,47.96,47.77,47.82,47.62,47.19,46.97,46.6,46.2,45.78,45.87,45.26,44.87,44.2,44.1,43.6,43.07,43.35,42.44,41.97,41.51,41.43,41.29,40.54,40.4,40.33,39.97,39.67,39.02,38.67,38.57,38.17,37.61,37.3,36.73,36.39,36.43,36.45,36.51,36.27,36.39,36.27,36.48,36.1],"zeroUp":[50,49.89,49.43,49.33,49.11,49.27,49.33,49.53,49.72,49.55,49.62,49.73,49.95,50.83,50.58,50.58,50.37,49.65,50.25,50.28,51.45,52.15,52.27,52.53,52.72,52.54,52.63,52.89,52.77,53.12,53.22,53.09,53.22,52.98,53.85,53.39,53.54,53.42,53.07,53,53.03,52.75,53.1,53.34,53.44,53.06,52.99,53.05,53.19,53.13,52.86,52.48,51.89,51.83,51.76,51.68,51.67,50.65,50.27,49.82,49.83,49.38,48.65,48.03,47.64,47.77,47.2,47.2,47.12,47.35,47.26,46.81,46.72,46.11,45.97,45.34,45.17,45.06,44.42,44.41,44.48,44.13,43.96,44.13,43.77,43.57,43.54,43,42.88,42.17,41.54,41.56,41.3,40.75,40.92,40.64,41.43,41.46,41.51,41.41,42,42.08,42.53,42.24,42.43,42.62,42.83,42.67,42.76,42.9,43.27,43.28,43.56,43.57,43.72,43.52,43.73,43.84,44.36,44.78],"bullDiv":[50,49.92,49.48,49.4,49.21,49.39,49.48,49.7,49.92,49.77,49.87,50.01,50.25,51.16,50.93,50.96,50.77,50.07,50.71,50.76,51.96,52.7,52.85,53.14,53.36,53.2,53.32,53.61,53.51,53.9,54.02,53.92,54.07,53.86,54.77,54.33,54.51,54.41,54.09,54.05,54.11,53.84,54.22,54.5,54.63,54.27,54.54,54.97,55.47,55.77,55.85,54.97,53.97,53.33,52.7,52.07,51.5,50.26,49.46,48.63,48.1,47.29,46.31,45.41,44.67,44.26,43.43,42.95,42.44,42.11,41.6,41.92,42.45,42.68,43.19,43.39,43.9,44.44,44.64,45.27,45.95,46.35,46.89,47.67,48.08,48.61,49.27,48.89,48.75,48.27,47.84,47.78,47.56,47.17,47.2,46.97,47.02,46.64,46.27,45.82,45.76,45.41,45.27,44.73,44.45,44.17,43.91,43.46,43.13,42.84,42.66,42.31,42.08,41.73,41.45,41,40.76,40.46,40.36,40.2,39.86,39.85,39.8,39.69,39.84,39.91,40.17,40.14,40.39,40.38,40.76,40.92,41.13],"bearDiv":[50,50.27,50.58,50.54,50.46,50.83,50.43,49.91,50.17,50.47,50.49,50.64,49.93,50,50.11,49.82,49.87,49.62,49.81,49.8,49.52,49.5,49.39,49.58,50.02,50.19,50.68,50.45,50.22,50.28,50.48,50.62,51.21,51.14,50.96,50.9,50.62,50.66,50.67,50.95,50.74,50.44,50.72,50.81,51.04,51.39,51.66,51.37,51.68,52.22,51.97,52.9,53.45,54.36,55.55,56.44,57.61,59.1,59.93,60.94,62.15,63.13,64.45,65,65.91,66.86,67.95,68.84,69.53,70.7,72.2,71.52,71.18,70.63,69.94,69.48,69.12,68.15,67.34,66.24,65.63,65.14,64.34,63.39,62.99,62.22,61.31,62.07,62.16,62.57,63.02,63.21,63.31,63.31,63.66,64.13,64.58,64.72,65,65.73,66.07,66.45,66.53,66.66,67.07,67.69,67.8,68.37,68.7,68.75,69.27,70.06,70.25,70.62,70.85,71.23,71.65,72.24,72.34,72.91,73.04,73.67,73.76,74.22,74.58,73.58,73.21,72.8,72.61,72.42,72.17,72.1,71.55],"downAccel":[50,49.83,50.08,50.04,50.25,49.83,49.58,49.2,49.59,49.71,49.7,49.9,50.44,50.17,50.47,50.59,50.37,50.52,50.78,51.17,51.61,52.04,52.21,52.09,52.55,52.79,52.88,53.06,53.62,53.7,53.66,53.94,54.1,54.52,54.46,54.77,54.6,54.9,55.52,55.51,55.93,56.28,56.56,56.57,57.35,57.88,57.52,57.93,58.09,58.13,58.26,58.7,59.04,58.89,58.44,58.57,58.41,58.02,58.1,57.68,57.21,57.09,57.5,57.47,57.37,56.84,56.52,56.45,56.64,56.86,56.38,55.43,55.96,55.99,55.63,55.39,55.36,55.81,55.64,55.33,54.88,54.82,54.41,54.36,54.14,53.79,54.07,53.87,54.12,53.97,54.02,53.22,52.94,52.84,52.39,52.52,51.55,50.66,49.34,48.29,47.3,46.42,46.19,45.75,45.48,45.09,45.37,45.46,45.26,45.11,44.97,44.62,43.95,43.19,42.74,42.24,41.73,41.2],"anatomy":[50,50.29,50.63,50.62,50.56,50.96,50.58,50.08,50.37,50.7,50.74,50.92,50.23,50.33,50.46,50.19,50.27,50.04,50.26,50.28,50.02,50.02,49.93,50.15,50.62,50.82,51.34,51.13,50.93,51.01,51.24,51.82,52.87,53.25,53.52,53.91,54.07,54.58,55.06,55.84,56.08,56.22,57.01,57.61,58.36,59.26,60.09,60.25,61.13,62.3,62.53,63.3,63.36,64.05,65.21,65.82,66.89,68.51,68.95,69.69,70.73,71.38,72.57,72.44,72.9,73.41,74.12,74.51,74.54,75.33,76.61,76.6,77.13,77.31,77.25,77.57,78.05,77.5,77.19,76.36,76.38,76.59,76.25,75.62,75.95,75.61,75.01,76.11,75.58,75.28,75.08,74.27,73.23,72,71.57,71.42,71.21,70.29,69.71,70.08,69.61,69.23,68.24,67.35,67.04,67.12,66.21,66.2,65.7,64.7,64.56,64.93,64.18,63.77,63.1,62.71,62.38,63.28,63.33,64.2,64.3,65.3,65.32,66,66.52,66.23,66.79,67.3,68.13,68.94,69.7,70.71,71.04,71.11,71.76,73.06,73.97,74.11,75.13,75.63,74.82],"L_cross":[50,49.84,50.15,50.07,49.25,48.8,48.95,49.01,49.48,48.82,48.99,48.82,48.99,48.91,49.22,49.41,49.51,49.41,49.22,48.69,49.06,49.32,49.57,49.58,49.56,49.6,49.63,49.7,50.28,50.4,50.49,50.55,50.25,50.47,50.14,50.03,49.98,49.77,49.66,49.93,49.37,49.75,50.06,50.27,50.54,50.63,51.31,51.7,52.11,52.88,53.23,53.8,54.57,54.42,54.76,54.81,55.87,56.38,56.57,56.63,56.43,56.65,57.31,58.01,58.37,58.72,59.14,59.33,59.6,59.68,59.78,59.96,60.94,61.35,61.52,61.58,61.43,61.73,62.68,63.45,64.22,65.21,65.43,65.69,66.62,67.32,68.48,69.39,70.28,71.23,72.07,72.48,72.91,73.35,73.89,74.09,73.8,73.99,73.31,71.46,71.21,70.79,69.86,70.39,70,70.24,70.25,70.46,70.54,70.2,70.09,70.04,70.49,70.15,70.2,70.34,70.89,71,71.69,72.16,73.26,74.28,74.3],"L_zero":[50,49.85,49.48,49.11,49.46,49.16,49.16,49.09,49.59,49.03,49.02,48.72,48.32,48.55,48.57,49.01,48.57,49.08,48.86,48.86,49.06,49.32,49.08,49.13,48.98,48.58,48.03,47.54,47.96,47.94,47.57,47.65,48.11,48.66,48.97,49.1,49.19,49.31,49.47,49.26,49.44,49.19,49.11,48.77,48.36,48.24,48.12,47.58,47.51,46.87,47.01,46.57,46.53,45.64,45.19,44.81,44.48,44.12,43.71,42.94,42.25,41.6,41.83,41.56,41.19,40.82,40.55,40.16,40.31,40.23,39.86,39.95,39.63,39.17,38.8,38.19,37.74,37.43,37.25,37.08,36.7,36.38,36.16,35.78,35.83,35.71,35.66,35.41,34.81,34.25,34.12,33.73,33.62,33.26,33.08,32.84,33.12,33.42,33.64,33.81,33.72,33.44,33.44,33.7,34.04,34.48,35.05,35.26,35.26,35.5,35.82,35.73,35.78,35.92,35.95,35.83,35.84,36.02,36.39,36.51,37.07,37.59,37.77,38.39],"L_hist":[50,49.79,50.05,49.92,49.06,48.56,48.66,48.67,49.08,48.38,48.5,48.28,48.4,48.28,48.53,48.68,48.73,48.57,48.35,47.78,48.08,48.3,48.49,48.45,48.38,48.38,48.36,48.38,48.9,48.96,49,49.01,48.67,48.83,48.46,48.31,48.22,47.96,47.81,48.02,47.44,47.94,48.39,48.74,49.14,49.38,50.19,50.73,51.28,52.19,52.7,53.42,54.35,54.37,54.87,55.09,56.32,57,57.37,57.6,57.57,57.97,58.82,59.72,60.27,60.81,61.43,61.81,62.28,62.55,62.84,63.23,64.45,65.08,65.46,65.71,65.75,66.28,67.49,68.53,69.57,70.1,70.22,70.36,70.85,71.23,71.84,72.31,72.78,73.27],"L_div":[50,50.08,49.9,49.78,50.11,50.59,50.73,51.05,51.36,50.76,51.06,51.05,50.64,50.02,49.38,49.26,49.48,49.77,50.14,50.52,50.75,51.33,51.27,51.37,51.4,50.9,51,50.64,50.57,50.63,50.96,50.73,51.03,51.14,50.86,50.71,51.25,51.43,51.32,51.35,51.26,51.42,51.87,51.77,51.51,51.21,51.41,51.77,51.6,51.91,52.22,51.09,50.14,49.66,49.26,48.6,47.69,46.92,46.4,45.66,44.79,43.93,43.24,42.8,42.33,41.75,41.13,40.5,39.81,39.46,38.88,39.31,39.85,40.18,40.39,40.9,41.18,41.54,42.35,42.55,43.15,43.54,43.93,44.23,44.83,45.06,45.17,44.85,44.73,44.42,44.16,44.08,43.84,44.07,43.86,43.61,43.49,43.39,43.3,43.01,42.51,42.15,42.01,41.68,41.62,41.55,41.3,41.18,40.87,40.67,40.3,39.94,39.58,39.27,39.21,38.85,38.57,38.35,38.24,37.97,37.74,37.59,37.38,37.26,36.99,37.27,37.46,37.63,37.88,37.93,38.13,38.24,38.4],"chop":[50.19,50.43,50.39,50.57,51.07,50.76,50.88,51.61,51.85,51.86,52.16,51.78,52.52,52.76,52.69,53.15,53.14,53.67,53.75,53.76,54.17,54.32,54.76,55.16,55.18,55.63,55.33,55.55,55.99,56.32,56.5,57.06,56.79,56.94,57.26,57.32,57.79,58,58.45,58.3,58.46,59.15,59.24,59.58,59.91,60.09,60.43,61.61,62.32,62.01,62.42,61.75,61.71,61.36,60.25,59.73,59.29,57.99,57.74,57.73,57.61,58.25,58.09,59.13,59.94,60.83,61.32,61.62,62.32,62.6,62.02,61.83,60.98,60.09,59.49,58.84,57.74,57.48,57.09,57.65,58.13,58.44,59.02,60.32,60.72,61.24,62.64,61.98,62.38,62.15,61.3,60.49,59.6,59.26,58.69,58.1,57.37,57.46,58.16,58.11,58.78,59.17,60.02,61.11,61.99,61.81,62.57,62.2,61.56,61.57,61.18,59.7,59.12,58.26,57.9,57.64,57.76,57.46,58.4,58.58]};
+const START = 25;
+const cache = {};
+function ema(a,n){const k=2/(n+1);const o=[a[0]];for(let i=1;i<a.length;i++)o.push(a[i]*k+o[i-1]*(1-k));return o;}
+function macdOf(key){if(cache[key])return cache[key];const p=DATA[key];const e12=ema(p,12),e26=ema(p,26);const m=p.map((_,i)=>e12[i]-e26[i]);const s=ema(m,9);const h=m.map((x,i)=>x-s[i]);return cache[key]={p,m,s,h};}
+function tok(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function lastCrossIdx(a,b){for(let i=a.length-1;i>START;i--){const d1=a[i]-(b?b[i]:0),d0=a[i-1]-(b?b[i-1]:0);if(Math.sign(d1)!==Math.sign(d0))return i;}return -1;}
+const DIVSPAN={a:[50,74],b:[86,127]};
+function extreme(arr,[x,y],dir){let bi=x;for(let i=x;i<y&&i<arr.length;i++){if(dir>0?arr[i]<arr[bi]:arr[i]>arr[bi])bi=i;}return bi;}
+
+function draw(cv){
+  const key=cv.dataset.key, ann=cv.dataset.ann||'none', dir=+(cv.dataset.dir||1);
+  const {p,m,s,h}=macdOf(key);
+  if(!cv.dataset.h)cv.dataset.h=cv.getAttribute('height');
+  const dpr=window.devicePixelRatio||1, W=cv.clientWidth||cv.parentElement.clientWidth, H=+cv.dataset.h;
+  if(!W)return;
+  cv.style.height=H+'px'; cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+  const c=cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,W,H);
+  const C={ink:tok('--price'),muted:tok('--muted'),rule:tok('--rule'),macd:tok('--macd'),sig:tok('--signal'),bull:tok('--bull'),bear:tok('--bear'),surf:tok('--surface')};
+  const n=p.length, L=6, R=26, T=8, gap=14, B=6;
+  const avail=H-T-B-gap, ph=Math.round(avail*0.55), mh=avail-ph, mt=T+ph+gap;
+  const x=i=>L+(i-START)/(n-1-START)*(W-L-R);
+  const win=a=>a.slice(START);
+  let pmin=Math.min(...win(p)),pmax=Math.max(...win(p));const pp=(pmax-pmin)*0.1;pmin-=pp;pmax+=pp;
+  const yp=v=>T+(pmax-v)/(pmax-pmin)*ph;
+  let mmin=Math.min(0,...win(m),...win(s),...win(h)),mmax=Math.max(0,...win(m),...win(s),...win(h));const mp=(mmax-mmin)*0.12;mmin-=mp;mmax+=mp;
+  const ym=v=>mt+(mmax-v)/(mmax-mmin)*mh;
+  cv._geo={x,n,L,R,W};
+  // separator
+  c.strokeStyle=C.rule;c.lineWidth=1;c.beginPath();c.moveTo(L,T+ph+gap/2+.5);c.lineTo(W-R,T+ph+gap/2+.5);c.stroke();
+  // labels
+  c.font='500 10.5px "IBM Plex Mono", ui-monospace, monospace';c.fillStyle=C.muted;c.textBaseline='top';
+  c.fillText('PRICE',L,T);c.fillText('MACD 12 26 9',L,mt+1);
+  // price area + line
+  c.beginPath();for(let i=START;i<n;i++){const X=x(i),Y=yp(p[i]);i===START?c.moveTo(X,Y):c.lineTo(X,Y);}
+  c.strokeStyle=C.ink;c.lineWidth=1.6;c.lineJoin='round';c.stroke();
+  c.lineTo(x(n-1),T+ph);c.lineTo(x(START),T+ph);c.closePath();c.globalAlpha=0.06;c.fillStyle=C.ink;c.fill();c.globalAlpha=1;
+  // zero line
+  c.setLineDash([3,4]);c.strokeStyle=C.muted;c.globalAlpha=.55;c.beginPath();c.moveTo(L,Math.round(ym(0))+.5);c.lineTo(W-R,Math.round(ym(0))+.5);c.stroke();c.setLineDash([]);c.globalAlpha=1;
+  c.fillStyle=C.muted;c.textBaseline='middle';c.fillText('0',W-R+6,ym(0));
+  // histogram
+  const step=(W-L-R)/(n-1-START), bw=Math.max(1,step*0.62);
+  for(let i=START;i<n;i++){const v=h[i],pv=h[i-1];const up=v>=0;const strong=up?v>=pv:v<=pv;
+    c.fillStyle=up?C.bull:C.bear;c.globalAlpha=strong?0.85:0.35;const y0=ym(0),y1=ym(v);c.fillRect(x(i)-bw/2,Math.min(y0,y1),bw,Math.max(1,Math.abs(y1-y0)));}
+  c.globalAlpha=1;
+  const line=(a,col,w)=>{c.beginPath();for(let i=START;i<n;i++){const X=x(i),Y=ym(a[i]);i===START?c.moveTo(X,Y):c.lineTo(X,Y);}c.strokeStyle=col;c.lineWidth=w;c.stroke();};
+  line(s,C.sig,1.6);line(m,C.macd,1.8);
+  // annotations
+  const ring=(X,Y,col)=>{c.beginPath();c.arc(X,Y,7,0,Math.PI*2);c.strokeStyle=col;c.lineWidth=2;c.stroke();};
+  const tag=(X,Y,txt,col,below)=>{c.font='600 11px "IBM Plex Sans", system-ui, sans-serif';const tw=c.measureText(txt).width;let tx=Math.min(Math.max(X-tw/2,L),W-R-tw);c.fillStyle=col;c.textBaseline=below?'top':'bottom';c.fillText(txt,tx,below?Y+8:Y-8);};
+  if(ann==='cross'||ann==='zero'){
+    const i=ann==='cross'?lastCrossIdx(m,s):lastCrossIdx(m,null);
+    if(i>0){c.setLineDash([2,3]);c.strokeStyle=C.muted;c.globalAlpha=.6;c.lineWidth=1;c.beginPath();c.moveTo(x(i)+.5,T);c.lineTo(x(i)+.5,mt+mh);c.stroke();c.setLineDash([]);c.globalAlpha=1;
+      ring(x(i),ym(ann==='cross'?m[i]:0),C.macd);}
+  } else if(ann==='div'){
+    const col=dir>0?C.bull:C.bear;
+    const pa=extreme(p,DIVSPAN.a,dir),pb=extreme(p,DIVSPAN.b,dir),ma=extreme(m,DIVSPAN.a,dir),mb=extreme(m,DIVSPAN.b,dir);
+    c.strokeStyle=col;c.lineWidth=2;
+    c.beginPath();c.moveTo(x(pa),yp(p[pa]));c.lineTo(x(pb),yp(p[pb]));c.stroke();
+    c.beginPath();c.moveTo(x(ma),ym(m[ma]));c.lineTo(x(mb),ym(m[mb]));c.stroke();
+    [[x(pa),yp(p[pa])],[x(pb),yp(p[pb])],[x(ma),ym(m[ma])],[x(mb),ym(m[mb])]].forEach(([X,Y])=>{c.beginPath();c.arc(X,Y,3.5,0,Math.PI*2);c.fillStyle=col;c.fill();});
+    tag(x(pb),yp(p[pb]),dir>0?'Lower low':'Higher high',col,dir>0);
+    tag(x(mb),ym(m[mb]),dir>0?'Higher low':'Lower high',col,dir>0);
+  }
+  // hover
+  const hi=cv._hover;
+  if(hi!=null){c.strokeStyle=C.muted;c.globalAlpha=.7;c.lineWidth=1;c.beginPath();c.moveTo(Math.round(x(hi))+.5,T);c.lineTo(Math.round(x(hi))+.5,mt+mh);c.stroke();c.globalAlpha=1;
+    [[yp(p[hi]),C.ink],[ym(m[hi]),C.macd],[ym(s[hi]),C.sig]].forEach(([Y,col])=>{c.beginPath();c.arc(x(hi),Y,3.8,0,Math.PI*2);c.fillStyle=col;c.fill();c.strokeStyle=C.surf;c.lineWidth=1.5;c.stroke();});}
+}
+
+const canvases=[];
+function register(cv){canvases.push(cv);draw(cv);}
+function redrawAll(){canvases.forEach(cv=>{if(cv.isConnected)draw(cv);});}
+
+// Anatomy with hover readout
+const an=document.getElementById('anatomy');an.dataset.key='anatomy';an.dataset.ann='none';
+const fmt=v=>(v>=0?'+':'−')+Math.abs(v).toFixed(2);
+function readout(i){const {m,s,h}=macdOf('anatomy');document.getElementById('r-day').textContent=(i-START+1)+(i===DATA.anatomy.length-1?' (today)':'');
+  document.getElementById('r-m').textContent=fmt(m[i]);document.getElementById('r-s').textContent=fmt(s[i]);
+  const rh=document.getElementById('r-h');rh.textContent=fmt(h[i]);rh.style.color=h[i]>=0?'var(--bull)':'var(--bear)';}
+function hoverAt(ev){const g=an._geo;if(!g)return;const r=an.getBoundingClientRect();const px=ev.clientX-r.left;
+  let i=Math.round(START+(px-g.L)/(g.W-g.L-g.R)*(g.n-1-START));i=Math.max(START,Math.min(g.n-1,i));an._hover=i;draw(an);readout(i);}
+an.addEventListener('pointermove',hoverAt);an.addEventListener('pointerdown',hoverAt);
+an.addEventListener('pointerleave',()=>{an._hover=null;draw(an);readout(DATA.anatomy.length-1);});
+register(an);readout(DATA.anatomy.length-1);
+document.querySelectorAll('canvas[data-key]').forEach(register);
+
+// Quiz
+const Q=[
+ {key:'crossUp',ann:'cross',a:'bull',why:'The uptrend paused, momentum dipped, and now the MACD line has crossed back above the signal line while both are above zero. A crossover in the direction of the trend, above zero, is the most reliable buy signal the MACD gives.'},
+ {key:'downAccel',ann:'none',a:'bear',why:'MACD is below zero and below its signal line, and the red bars are getting taller. Selling is speeding up, with no sign of a turn yet.'},
+ {key:'crossUpBelow',ann:'cross',a:'mix',why:'The MACD line crossed above the signal line, which looks like a buy signal. But it happened well below zero, inside a downtrend. It says selling is slowing, not that buyers are in control. This is the same setup as AAOI right now.'},
+ {key:'bearDiv',ann:'div',dir:-1,a:'bear',why:'Price made a higher high, but the MACD made a lower high. The second push up had less momentum behind it. That\'s bearish divergence, an early warning that the rally is tiring. The histogram has also turned red.'},
+ {key:'zeroUp',ann:'zero',a:'bull',why:'The MACD line has just crossed above zero, so the 12-day average is now above the 26-day average. The short-term trend has flipped up, and the MACD is above its signal line too.'},
+ {key:'chop',ann:'none',a:'mix',why:'Price is going sideways and the MACD keeps flipping back and forth around zero. Each crossover reverses within days. The MACD is a trend tool, and in a range it mostly produces false signals.'},
+ {key:'crossDownTop',ann:'cross',a:'bear',why:'After a strong run, the MACD crossed below its signal line while still well above zero. The trend is still up, but momentum is fading fast. It\'s a warning sign that often comes before a pullback.'},
+ {key:'bullDiv',ann:'div',dir:1,a:'bull',why:'Price made a lower low, but the MACD made a higher low, and the histogram has turned green. The second sell-off had less force behind it. That\'s bullish divergence, often an early sign of a bottom. Price still needs to confirm it.'},
+];
+const LBL={bull:'Bullish',bear:'Bearish',mix:'Mixed / no clear signal'};
+let qi=0, score=0, results=[];
+const quiz=document.getElementById('quiz');
+function progress(){return '<div class="progress" aria-hidden="true">'+Q.map((_,i)=>`<i class="${results[i]===true?'ok':results[i]===false?'no':i===qi?'cur':''}"></i>`).join('')+'</div>';}
+function renderQ(){
+  const q=Q[qi];
+  quiz.innerHTML=`<div class="qhead"><span class="eyebrow">Question ${qi+1} of ${Q.length}</span>${progress()}</div>
+   <p class="qprompt">What is the MACD saying at the right edge of this chart?</p>
+   <canvas id="qcv" height="290" role="img" aria-label="Quiz chart ${qi+1}"></canvas>
+   <div class="choices">${['bull','bear','mix'].map(v=>`<button class="choice" id="c-${v}" data-v="${v}"><span class="dot"></span>${v==='mix'?'Mixed':LBL[v]}</button>`).join('')}</div>
+   <div id="fb"></div>`;
+  const cv=document.getElementById('qcv');cv.dataset.key=q.key;cv.dataset.ann='none';if(q.dir)cv.dataset.dir=q.dir;register(cv);
+  quiz.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>answer(b.dataset.v)));
+}
+function answer(v){
+  const q=Q[qi], ok=v===q.a; if(ok)score++; results[qi]=ok;
+  quiz.querySelectorAll('.choice').forEach(b=>{b.disabled=true;if(b.dataset.v===q.a)b.classList.add('right');else if(b.dataset.v===v)b.classList.add('wrong');else b.classList.add('dim');});
+  const cv=document.getElementById('qcv');cv.dataset.ann=q.ann;draw(cv);
+  quiz.querySelector('.progress').outerHTML=progress();
+  const fb=document.getElementById('fb');
+  fb.innerHTML=`<div class="feedback ${ok?'ok':'no'}"><span class="verdict">${ok?'Correct.':'Not quite. The answer is '+LBL[q.a]+'.'}</span><p>${q.why}</p>
+   <button class="btn" id="next">${qi<Q.length-1?'Next question':'See my score'}</button></div>`;
+  const nx=document.getElementById('next');nx.addEventListener('click',()=>{qi++;qi<Q.length?renderQ():renderScore();});nx.focus({preventScroll:true});
+}
+function renderScore(){
+  const msg=score>=7?'You can read a MACD. Next step is using it alongside price structure.':score>=5?'Solid. Revisit the crossover table in Part 2; the "where it happens" part is where most people slip.':'Worth another go. Focus on two things: which side of zero the lines are on, and whether the bars are growing or shrinking.';
+  quiz.innerHTML=`<div class="score"><span class="eyebrow">Your score</span>${progress()}<span class="big">${score} / ${Q.length}</span><p>${msg}</p><button class="btn ghost" id="again">Try again</button></div>`;
+  document.getElementById('again').addEventListener('click',()=>{qi=0;score=0;results=[];renderQ();});
+}
+renderQ();
+
+// Redraw on resize and theme change
+let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(redrawAll,60);}).observe(document.body);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redrawAll);
+new MutationObserver(redrawAll).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','class']});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(redrawAll);
+</script>
+
+</body></html>
